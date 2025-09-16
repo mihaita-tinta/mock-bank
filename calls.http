@@ -1,0 +1,60 @@
+
+### Get available mock banks
+GET http://localhost:8081/api/providers/top?country=RO&count=10
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.global.set("providerId", jsonPath(response.body, "$[0].id"))
+%}
+
+### Initiate payment
+PUT http://localhost:8081/api/payments
+Content-Type: application/json
+
+{
+    "amount": 4.99,
+    "currency": "EUR",
+    "paymentId": "abc-123",
+    "returnUrl": "http://localhost:8080",
+    "description": "☕️Coffee",
+    "email" : "test@example.com",
+    "providerId": "{{providerId}}",
+    "source_user_id": "1001"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.global.set("paymentId", jsonPath(response.body, "$.id"))
+%}
+
+### Get payment status
+GET http://localhost:8081/api/payments/{{paymentId}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
+### Confirm payment
+# Available statuses: New, Processing, Failed, Done
+PATCH http://localhost:8081/api/payments/{{paymentId}}
+Content-Type: application/json
+
+{
+    "status": "Done"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
