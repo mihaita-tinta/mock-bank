@@ -38,11 +38,14 @@ Alternatively, one can display a QR code the customer can use to access the mock
 
 ### Mock bank login
 All mock banks allow any credentials to be used to login:
+
 ![bank_login.png](docs/bank_login.png)
 
 ### Confirm payment
 The customer can confirm the payment when seeing the payment details:
+
 ![confirm.png](docs/confirm.png)
+
 __Note that `FoxBank` always moves the payment to status `Failed`__
 
 ### Redirect to your app
