@@ -73,3 +73,19 @@ Date: Tue, 16 Sep 2025 07:33:30 GMT
   "status": "Done"
 }
 ```
+
+### Docker stuff
+
+To build/publish new image:
+
+```shell
+mvn spring-boot:build-image
+docker tag docker.io/library/mock-bank:0.0.1-SNAPSHOT mihaitatinta/mock-bank:latest
+docker push mihaitatinta/mock-bank:latest
+```
+
+To run the app with docker:
+
+```shell
+docker run -it -p 8081:8081 mihaitatinta/mock-bank:latest -- sh
+```
