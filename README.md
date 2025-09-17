@@ -74,6 +74,10 @@ Date: Tue, 16 Sep 2025 07:33:30 GMT
 }
 ```
 
+### Auto update payment status
+To configure the payments to be moved automatically to a certain status we can pass a program arguments: `--mock-bank.autoUpdateStatus=Failed` to fail all payments.
+This transition happens every 10 seconds for New payments.
+
 ### Docker stuff
 
 To build/publish new image:

@@ -58,3 +58,15 @@ Content-Type: application/json
 %}
 
 
+### Validate payment status
+GET http://localhost:8081/api/payments/{{paymentId}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.test("Payment status is Done", function () {
+        client.assert(response.body.status === 'Done', "Payment status is not Done");
+    });
+%}
+

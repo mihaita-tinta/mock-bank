@@ -19,22 +19,25 @@ import java.util.concurrent.ThreadLocalRandom;
 @RestController
 public class PaymentsController {
 
-    private final Map<UUID, Payment> payments = new ConcurrentHashMap<>();
+    private final PaymentsService paymentsService;
+
+    public PaymentsController(PaymentsService paymentsService) {
+        this.paymentsService = paymentsService;
+    }
 
     @PutMapping("/api/payments")
     public PaymentResponse createPayment(@RequestBody Requests.PaymentCreate paymentCreate) throws InterruptedException {
         simulateRealWork();
         // Log the received payment request (for debugging purposes)
         System.out.println("Received payment request: " + paymentCreate);
-        UUID internalReference = UUID.randomUUID();
-        Payment payment = new Payment(internalReference, paymentCreate, PaymentStatus.New);
-        payments.put(internalReference, payment);
+
+        var payment = paymentsService.save(paymentCreate);
         // Return a new PaymentStatus indicating the payment is being processed
         return new PaymentResponse(
-                internalReference.toString(),
-                "http://localhost:8081/?id=" + internalReference,
-                "dummy-qr-code-for-" + internalReference,
-                "dummy-token-for-" + internalReference,
+                payment.id.toString(),
+                "http://localhost:8081/?id=" + payment.id.toString(),
+                "dummy-qr-code-for-" + payment.id.toString(),
+                "dummy-token-for-" + payment.id.toString(),
                 payment.request().description(),
                 payment.request().amount(),
                 payment.status
@@ -44,7 +47,7 @@ public class PaymentsController {
     @GetMapping("/api/payments/{paymentId}")
     public PaymentResponse get(@PathVariable UUID paymentId) throws InterruptedException {
         simulateRealWork();
-        Payment payment = payments.get(paymentId);
+        Payment payment = paymentsService.findById(paymentId);
         return new PaymentResponse(
                 paymentId.toString(),
                 "http://localhost:8081/?id=" + paymentId,
@@ -56,24 +59,19 @@ public class PaymentsController {
         );
     }
 
+
     @PatchMapping("/api/payments/{paymentId}")
     public PaymentResponse updatePaymentStatus(@PathVariable UUID paymentId, @RequestBody UpdateStatusRequest req) throws InterruptedException {
         simulateRealWork();
-        Payment payment = payments.get(paymentId);
-        if (payment == null) {
-            throw new IllegalArgumentException("Payment not found");
-        }
-        PaymentStatus newStatus = req.status();
-        Payment updated = new Payment(paymentId, payment.request(), newStatus);
-        payments.put(paymentId, updated);
+        Payment update = paymentsService.update(paymentId, req);
         return new PaymentResponse(
                 paymentId.toString(),
                 "http://localhost:8081/?id=" + paymentId,
                 "dummy-qr-code-for-" + paymentId,
                 "dummy-token-for-" + paymentId,
-                payment.request().description(),
-                payment.request().amount(),
-                newStatus
+                update.request().description(),
+                update.request().amount(),
+                update.status
         );
     }
 
